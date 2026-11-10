@@ -207,9 +207,13 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .nothing-t { color: var(--text); font-size: 16px; font-weight: 700; margin-bottom: 6px; }
 .foot { flex-shrink: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 9px 16px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--muted); background: rgba(0,0,0,.2); }
 .foot span { display: inline-flex; align-items: center; gap: 3px; }
-.foot .credit { gap: 7px; margin-right: auto; color: var(--muted-2); }
-.foot .credit b { color: var(--text); font-weight: 600; }
-.foot .credit i { font-style: normal; opacity: .5; }
+.credit-tab {
+  position: absolute; bottom: 100%; left: 22px; margin-bottom: -1px; height: 26px; padding: 0 14px;
+  display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 12px; color: var(--muted);
+  background: var(--glass); border: 1px solid var(--edge-hover); border-bottom: 0; border-radius: 11px 11px 0 0;
+}
+.credit-tab b { color: var(--text); font-weight: 600; }
+.credit-tab i { font-style: normal; opacity: .45; }
 .credit-link { border: 0; background: none; padding: 0; font: inherit; color: var(--muted); cursor: pointer; }
 .credit-link:hover { color: var(--accent); }
 kbd { font: 600 10.5px "Geologica Variable", "Segoe UI", sans-serif; color: var(--text); background: #24262b; border: 1px solid #31353e; border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; min-width: 18px; text-align: center; }

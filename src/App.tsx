@@ -482,6 +482,13 @@ export default function App() {
             Обновить до {update}
           </button>
         )}
+        <div className="credit-tab">
+          created by <b>filosov</b>
+          <i>|</i>
+          <button className="credit-link" title="Скопировать ник в Discord" onClick={async () => { await navigator.clipboard.writeText("f1losovsky"); say("Discord скопирован: f1losovsky"); }}>Discord — f1losovsky</button>
+          <i>|</i>
+          <button className="credit-link" title="Открыть Telegram" onClick={() => openUrl("https://t.me/filosovsky").catch(() => {})}>Telegram — filosovsky</button>
+        </div>
         {settings && settings.showPromo !== false && (
           <button
             className="promo"
@@ -711,16 +718,8 @@ export default function App() {
               />
             )}
           </div>
-          <div className="foot">
-            <span className="credit">
-              created by <b>filosov</b>
-              <i>|</i>
-              <button className="credit-link" title="Скопировать ник в Discord" onClick={async () => { await navigator.clipboard.writeText("f1losovsky"); say("Discord скопирован: f1losovsky"); }}>Discord — f1losovsky</button>
-              <i>|</i>
-              <button className="credit-link" title="Открыть Telegram" onClick={() => openUrl("https://t.me/filosovsky").catch(() => {})}>Telegram — filosovsky</button>
-            </span>
-            {view.kind === "home" && hits.length > 0 && (
-              <>
+          {view.kind === "home" && hits.length > 0 && (
+            <div className="foot">
                 <span><kbd>↑</kbd><kbd>↓</kbd> выбрать</span>
                 <span><kbd>Enter</kbd> открыть</span>
                 <span><kbd>Ctrl</kbd><kbd>C</kbd> копировать</span>
@@ -728,9 +727,8 @@ export default function App() {
                 <span><kbd>Esc</kbd> очистить</span>
                 <span><kbd>Ctrl</kbd><kbd>Пробел</kbd> голосом</span>
                 <span><kbd>Ctrl</kbd><kbd>Enter</kbd> спросить ИИ</span>
-              </>
-            )}
-          </div>
+            </div>
+          )}
           {toast && <div className="toast">{toast}</div>}
         </div>
       )}
