@@ -19,13 +19,12 @@ type Settings = {
   autoUpdate: boolean;
   voiceOverlay: boolean;
   scale: number;
-  promo: string;
+  showPromo: boolean;
   autostart: boolean;
 };
 
-/** то, что вводится в игре: /promo <код> */
-const promoCmd = (code: string) => `/promo ${code.toLowerCase()}`;
-const cleanPromo = (v: string) => v.replace(/^\s*\/?promo\s+/i, "").replace(/[^\p{L}\p{N}_-]/gu, "").slice(0, 32);
+/** промокод автора, кнопка в строке копирует «/promo filosov» */
+const PROMO = "filosov";
 
 const clampScale = (v: number) => Math.round(Math.min(1.5, Math.max(0.7, v)) * 10) / 10;
 type Panel = "library" | "history" | "settings" | "notes";
@@ -483,12 +482,12 @@ export default function App() {
             Обновить до {update}
           </button>
         )}
-        {settings?.promo && (
+        {settings && settings.showPromo !== false && (
           <button
             className="promo"
-            title={`Скопировать ${promoCmd(settings.promo)}`}
+            title={`Скопировать /promo ${PROMO}`}
             onClick={async () => {
-              const cmd = promoCmd(settings.promo);
+              const cmd = `/promo ${PROMO}`;
               try {
                 await navigator.clipboard.writeText(cmd);
                 say(`Скопировано: ${cmd}`);
@@ -499,7 +498,7 @@ export default function App() {
           >
             <svg viewBox="0 0 24 24" className="promo-ic"><path d="M4 11h16v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM3 7h18v4H3zM12 7v14M12 7S10.5 3 8 3a2 2 0 0 0 0 4M12 7s1.5-4 4-4a2 2 0 0 1 0 4" /></svg>
             <span className="promo-cmd">/promo</span>
-            <span className="promo-code">{settings.promo.toUpperCase()}</span>
+            <span className="promo-code">{PROMO.toUpperCase()}</span>
           </button>
         )}
         <div className="seg" title="Где искать (Tab)">
@@ -712,17 +711,26 @@ export default function App() {
               />
             )}
           </div>
-          {view.kind === "home" && hits.length > 0 && (
-            <div className="foot">
-              <span><kbd>↑</kbd><kbd>↓</kbd> выбрать</span>
-              <span><kbd>Enter</kbd> открыть</span>
-              <span><kbd>Ctrl</kbd><kbd>C</kbd> копировать</span>
-              <span><kbd>Tab</kbd> правила / законы</span>
-              <span><kbd>Esc</kbd> очистить</span>
-              <span><kbd>Ctrl</kbd><kbd>Пробел</kbd> голосом</span>
-              <span><kbd>Ctrl</kbd><kbd>Enter</kbd> спросить ИИ</span>
-            </div>
-          )}
+          <div className="foot">
+            <span className="credit">
+              created by <b>filosov</b>
+              <i>|</i>
+              <button className="credit-link" title="Скопировать ник в Discord" onClick={async () => { await navigator.clipboard.writeText("f1losovsky"); say("Discord скопирован: f1losovsky"); }}>Discord — f1losovsky</button>
+              <i>|</i>
+              <button className="credit-link" title="Открыть Telegram" onClick={() => openUrl("https://t.me/filosovsky").catch(() => {})}>Telegram — filosovsky</button>
+            </span>
+            {view.kind === "home" && hits.length > 0 && (
+              <>
+                <span><kbd>↑</kbd><kbd>↓</kbd> выбрать</span>
+                <span><kbd>Enter</kbd> открыть</span>
+                <span><kbd>Ctrl</kbd><kbd>C</kbd> копировать</span>
+                <span><kbd>Tab</kbd> правила / законы</span>
+                <span><kbd>Esc</kbd> очистить</span>
+                <span><kbd>Ctrl</kbd><kbd>Пробел</kbd> голосом</span>
+                <span><kbd>Ctrl</kbd><kbd>Enter</kbd> спросить ИИ</span>
+              </>
+            )}
+          </div>
           {toast && <div className="toast">{toast}</div>}
         </div>
       )}
@@ -1042,13 +1050,7 @@ function SettingsView({
 
       <h3>Промокод</h3>
       <div className="card">
-        <div className="row">
-          <div>
-            <div>Промокод на кнопке</div>
-            <div className="muted small">Кнопка в строке копирует «/promo код». Медиа может поставить свой. Пусто — кнопки не будет</div>
-          </div>
-          <PromoInput value={s.promo ?? ""} onChange={(v) => set({ promo: v })} />
-        </div>
+        <Toggle label="Плашка промокода" hint="Кнопка «/promo FILOSOV» в строке. Выключено — её не будет" on={s.showPromo !== false} onChange={(v) => set({ showPromo: v })} />
       </div>
 
       <h3>Размер</h3>
@@ -1155,20 +1157,3 @@ function UpdateRow() {
   );
 }
 
-function PromoInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const [v, setV] = useState(value);
-  useEffect(() => setV(value), [value]);
-  const commit = () => { const c = cleanPromo(v); setV(c); if (c !== value) onChange(c); };
-  return (
-    <input
-      className="promo-input"
-      value={v}
-      placeholder="filosov"
-      spellCheck={false}
-      maxLength={40}
-      onChange={(e) => setV(e.target.value)}
-      onBlur={commit}
-      onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); commit(); (e.target as HTMLInputElement).blur(); } }}
-    />
-  );
-}

@@ -94,8 +94,8 @@ struct Settings {
     voice_overlay: bool,
     /// размер окна: 1.0 — обычный, 0.7…1.5
     scale: f64,
-    /// промокод на кнопке в строке (пусто — кнопку не показывать)
-    promo: String,
+    /// показывать плашку промокода в строке
+    show_promo: bool,
 }
 
 impl Default for Settings {
@@ -109,7 +109,7 @@ impl Default for Settings {
             auto_update: true,
             voice_overlay: true,
             scale: 1.0,
-            promo: "filosov".into(),
+            show_promo: true,
         }
     }
 }
@@ -793,15 +793,8 @@ fn get_settings(app: AppHandle, state: State<AppState>) -> SettingsView {
 }
 
 #[tauri::command]
-fn set_settings(app: AppHandle, webview: Webview, state: State<AppState>, mut settings: Settings) -> Res<()> {
+fn set_settings(app: AppHandle, webview: Webview, state: State<AppState>, settings: Settings) -> Res<()> {
     require(&webview, "main")?;
-    // в промокоде только буквы, цифры, _ и -, не длиннее 32
-    settings.promo = settings
-        .promo
-        .chars()
-        .filter(|c| c.is_alphanumeric() || *c == '_' || *c == '-')
-        .take(32)
-        .collect();
     let mut cur = state.settings.lock().unwrap();
     if settings.hotkey != cur.hotkey || settings.voice_overlay != cur.voice_overlay {
         if let Err(e) = register_hotkeys(&app, &settings) {
