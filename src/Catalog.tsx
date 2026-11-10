@@ -13,6 +13,13 @@ type Sort = "price-asc" | "price-desc" | "name";
 
 const TABS: [Tab, string][] = [["vehicles", "Транспорт"], ["clothes", "Одежда"], ["hair", "Причёски"], ["items", "Предметы"]];
 const PAGE = 60;
+const CDN = "https://cdn.trace-rp.com/cloud/";
+/** картинки для карточек главного экрана — из самого каталога Trace */
+const HERO = {
+  vehicles: ["vehicle:gtr50", "vehicle:i8"],
+  person: [CDN + "inventoryItems/clothes/male/tops/a903b604.webp", CDN + "img/appearance-shop/previews/barber/male/hair_39_0.webp"],
+  items: [CDN + "inventoryItems/items/1.png", CDN + "inventoryItems/items/202.png", CDN + "inventoryItems/items/13.png"],
+};
 
 const norm = (s: string) => s.toLowerCase().replace(/ё/g, "е");
 /** «2 150 000 000 $» → число (TC и «Не продаётся» — в конец списка) */
@@ -51,7 +58,7 @@ function Pic({ src, alt }: { src?: string; alt: string }) {
 
 export default function Catalog({ onCopy }: { onCopy: (text: string, what: string) => void }) {
   const data = useCatalog();
-  const [tab, setTab] = useState<Tab>(() => (localStorage.getItem("catTab") as Tab) || "vehicles");
+  const [tab, setTab] = useState<Tab | null>(null);
   const [q, setQ] = useState("");
   const [gender, setGender] = useState<"Мужская" | "Женская">("Мужская");
   const [cat, setCat] = useState("Все");
@@ -59,7 +66,6 @@ export default function Catalog({ onCopy }: { onCopy: (text: string, what: strin
   const [sort, setSort] = useState<Sort>("price-asc");
   const [limit, setLimit] = useState(PAGE);
 
-  useEffect(() => { try { localStorage.setItem("catTab", tab); } catch {} }, [tab]);
   useEffect(() => setLimit(PAGE), [tab, q, gender, cat, salon, sort]);
 
   const hasFemale = (data?.clothes ?? []).some((c) => c.gender === "Женская");
@@ -94,16 +100,68 @@ export default function Catalog({ onCopy }: { onCopy: (text: string, what: strin
         .sort(sorter);
     }
     if (tab === "hair") return data.hair.filter((h) => h.gender === hairGender && match(h.name)).sort(sorter);
-    return data.items.filter((i) => match(i.name, i.desc)).sort((a, b) => a.name.localeCompare(b.name, "ru"));
+    if (tab === "items") return data.items.filter((i) => i.name !== "???" && match(i.name, i.desc)).sort((a, b) => a.name.localeCompare(b.name, "ru"));
+    return [];
   }, [data, tab, q, gender, cat, salon, sort, hairGender]);
 
   if (!data) return <div className="muted pad">Загружаю каталог…</div>;
+
+  const open = (t: Tab, opts: { salon?: string; gender?: "Мужская" | "Женская" } = {}) => {
+    setTab(t); setQ(""); setCat("Все"); setSalon(opts.salon ?? "Все");
+    if (opts.gender) setGender(opts.gender);
+  };
+  if (!tab) {
+    const vimg = (id: string) => data.vehicles.find((v) => v.id === id.split(":")[1])?.img;
+    const count = (n: number) => n.toLocaleString("ru-RU");
+    const vehicleChips = salons.filter((x) => x !== "Все" && !/^Салон \d+$|^Без салона$/.test(x)).slice(0, 7);
+    return (
+      <div className="catalog">
+        <h1 className="h">Каталог Trace</h1>
+        <div className="hub">
+          <div className="hub-card" onClick={() => open("vehicles")}>
+            <div className="hub-text">
+              <h2>Транспорт</h2>
+              <div className="muted small">{count(data.vehicles.length)} моделей: цены, салоны, скорость, багажник</div>
+              <div className="hub-chips" onClick={(e) => e.stopPropagation()}>
+                <button onClick={() => open("vehicles")}>Все</button>
+                {vehicleChips.map((x) => <button key={x} onClick={() => open("vehicles", { salon: x })}>{x}</button>)}
+              </div>
+            </div>
+            <div className="hub-art">{HERO.vehicles.map((h, i) => vimg(h) && <img key={h} className={`a${i}`} src={vimg(h)} alt="" draggable={false} />)}</div>
+          </div>
+          <div className="hub-card" onClick={() => open("clothes")}>
+            <div className="hub-text">
+              <h2>Персонаж</h2>
+              <div className="muted small">Одежда и причёски с ценами</div>
+              <div className="hub-chips" onClick={(e) => e.stopPropagation()}>
+                <button onClick={() => open("clothes", { gender: "Мужская" })}>Одежда · М</button>
+                <button onClick={() => open("clothes", { gender: "Женская" })}>Одежда · Ж</button>
+                <button onClick={() => open("hair", { gender: "Мужская" })}>Причёски · М</button>
+                <button onClick={() => open("hair", { gender: "Женская" })}>Причёски · Ж</button>
+              </div>
+            </div>
+            <div className="hub-art">{HERO.person.map((h, i) => <img key={h} className={`a${i}`} src={h} alt="" draggable={false} />)}</div>
+          </div>
+          <div className="hub-card" onClick={() => open("items")}>
+            <div className="hub-text">
+              <h2>Предметы</h2>
+              <div className="muted small">Что это и для чего нужно</div>
+              <div className="hub-chips" onClick={(e) => e.stopPropagation()}>
+                <button onClick={() => open("items")}>Все предметы</button>
+              </div>
+            </div>
+            <div className="hub-art items">{HERO.items.map((h, i) => <img key={h} className={`a${i}`} src={h} alt="" draggable={false} />)}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   const shown = list.slice(0, limit);
 
   return (
     <div className="catalog">
       <div className="cat-top">
-        <h1 className="h">Каталог</h1>
+        <button className="link" onClick={() => setTab(null)}>‹ Каталог</button>
         <Chips value={tab} options={TABS} onChange={(t) => { setTab(t); setQ(""); }} />
       </div>
 
