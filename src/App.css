@@ -1,22 +1,25 @@
 :root {
-  --glass: rgba(19, 19, 19, 0.96);
-  --panel: rgba(19, 19, 19, 0.97);
-  --card: #181818;
-  --card-hover: #1e1e1e;
-  --edge: rgba(255, 255, 255, 0.055);
-  --edge-hover: rgba(255, 255, 255, 0.11);
-  --line: #262626;
+  /* цвета из брендбука Trace (logs.trace-rp.com/admin/docs/brand) */
+  --glass: rgba(13, 15, 20, 0.96);      /* Основной Чёрный #0d0f14 */
+  --panel: rgba(13, 15, 20, 0.97);
+  --card: #1b1d22;                       /* Основной Тёмно-серый */
+  --card-hover: #24262b;                 /* Тёмный 1 */
+  --edge: rgba(199, 200, 255, 0.06);
+  --edge-hover: rgba(199, 200, 255, 0.13);
+  --line: #282b31;                       /* Тёмный 2 */
   --text: #ffffff;
-  --muted: #949494;
-  --muted-2: #6e6e6e;
-  --accent: #f2475e;
-  --accent-rgb: 242, 71, 94;
+  --muted: #8e95a5;                      /* Нейтральный 3 */
+  --muted-2: #687287;                    /* Нейтральный 1 */
+  --accent: #4d7dff;                     /* Trace */
+  --accent-rgb: 77, 125, 255;
   --accent-ink: #ffffff;
-  --accent-soft: rgba(var(--accent-rgb), 0.13);
-  --ok: #45cd63;
-  --bad: #f2475e;
+  --accent-soft: rgba(var(--accent-rgb), 0.14);
+  --purple: #7374ff;                     /* Trace Пурпурный */
+  --pastel: #c7c8ff;                     /* Trace Пастельный */
+  --ok: #00ad69;                         /* Успех */
+  --bad: #ff344b;                        /* Опасный светлый */
   --ease: cubic-bezier(.16, 1, .3, 1);
-  font-family: "Manrope Variable", "Segoe UI", system-ui, sans-serif;
+  font-family: "Geologica Variable", "Segoe UI", system-ui, sans-serif;
   font-size: 14px;
   font-weight: 500;
   color: var(--text);
@@ -25,7 +28,7 @@
 * { box-sizing: border-box; }
 html, body, #root { margin: 0; height: 100%; overflow: hidden; background: transparent; }
 button { font: inherit; color: inherit; }
-mark { background: var(--accent-soft); color: #ff8797; border-radius: 4px; padding: 0 2px; }
+mark { background: var(--accent-soft); color: var(--pastel); border-radius: 4px; padding: 0 2px; }
 svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
 /* окно прозрачное: видна только строка и панель под ней, вокруг место под тень */
@@ -47,17 +50,17 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
   position: relative; width: 40px; height: 40px; flex-shrink: 0; padding: 0; border: 0; background: transparent;
   border-radius: 50%; cursor: pointer; display: grid; place-items: center;
 }
-.logo-mark { width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 3px 8px rgba(40, 14, 100, .5)); pointer-events: none; }
+.logo-mark { width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 3px 8px rgba(55, 102, 255, .45)); pointer-events: none; }
 .logo-pin {
   position: absolute; inset: 0; border-radius: 50%; display: grid; place-items: center;
-  background: rgba(20, 12, 40, .78); color: #fff; opacity: 0; transition: opacity .15s;
+  background: rgba(13, 15, 20, .8); color: #fff; opacity: 0; transition: opacity .15s;
 }
 .logo-pin svg { width: 17px; height: 17px; }
 .logo:hover .logo-pin { opacity: 1; }
-.logo.pinned .logo-pin { opacity: 1; background: rgba(124, 58, 237, .85); }
+.logo.pinned .logo-pin { opacity: 1; background: rgba(115, 116, 255, .85); }
 .logo.pinned::after {
   content: ""; position: absolute; right: -2px; bottom: -2px; width: 10px; height: 10px; border-radius: 50%;
-  background: #45cd63; border: 2px solid #131313;
+  background: var(--ok); border: 2px solid #0d0f14;
 }
 .q {
   flex: 1; min-width: 220px; align-self: stretch; height: 100%; background: transparent; border: 0; outline: none; color: var(--text);
@@ -106,7 +109,7 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .hit.sel { border-color: rgba(var(--accent-rgb), 0.5); background: rgba(var(--accent-rgb), 0.06); box-shadow: inset 3px 0 0 var(--accent); }
 .hit-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .hit-doc { color: var(--muted); font-size: 12px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hit-text { line-height: 1.55; color: #e6e6e6; }
+.hit-text { line-height: 1.55; color: #e0e5ef; }
 .copy { border: 0; background: transparent; color: var(--muted); cursor: pointer; border-radius: 6px; padding: 2px 6px; opacity: 0; }
 .hit:hover .copy, .hit.sel .copy { opacity: 1; }
 .copy:hover { color: var(--accent); }
@@ -163,7 +166,7 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .keys { padding: 10px 0; line-height: 1.6; }
 .btns { display: flex; gap: 6px; }
 .switch { width: 38px; height: 21px; border-radius: 99px; background: rgba(255,255,255,.12); position: relative; flex-shrink: 0; transition: background .2s; }
-.switch > span { position: absolute; top: 3px; left: 3px; width: 15px; height: 15px; border-radius: 50%; background: #cfd3da; transition: transform .2s; }
+.switch > span { position: absolute; top: 3px; left: 3px; width: 15px; height: 15px; border-radius: 50%; background: #9ca2ae; transition: transform .2s; }
 .switch.on { background: var(--accent); }
 .switch.on > span { transform: translateX(17px); background: #fff; }
 .hotkey { min-width: 120px; border: 1px solid var(--line); background: rgba(0,0,0,.25); border-radius: 8px; padding: 7px 14px; font: 600 13px "Cascadia Mono", Consolas, monospace; cursor: pointer; color: var(--accent); }
@@ -186,7 +189,7 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .empty ol { text-align: left; color: var(--muted); line-height: 1.7; margin: 0 0 18px; padding-left: 22px; }
 
 .toast {
-  position: absolute; left: 50%; bottom: 46px; transform: translateX(-50%); background: #262626;
+  position: absolute; left: 50%; bottom: 46px; transform: translateX(-50%); background: #24262b;
   border: 1px solid var(--line); padding: 7px 16px; border-radius: 99px; box-shadow: 0 4px 10px rgba(0,0,0,.35);
   white-space: nowrap; animation: up .15s ease-out;
 }
@@ -200,15 +203,15 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .hits-head { display: flex; align-items: center; gap: 10px; margin: 0 2px 8px; font-size: 12px; color: var(--muted); font-weight: 600; }
 .fixed { color: var(--accent); background: var(--accent-soft); padding: 2px 9px; border-radius: 99px; }
 .kind { font-size: 10.5px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; padding: 2px 7px; border-radius: 6px; flex-shrink: 0; }
-.kind.r { color: #7fb4ff; background: rgba(127, 180, 255, .12); }
-.kind.l { color: #ffb86b; background: rgba(255, 184, 107, .12); }
-.pun { margin-top: 8px; display: flex; gap: 8px; align-items: baseline; font-size: 12.5px; line-height: 1.45; color: #f0f0f0;
+.kind.r { color: #00d4ff; background: rgba(0, 212, 255, .12); }
+.kind.l { color: #f9ad26; background: rgba(249, 173, 38, .12); }
+.pun { margin-top: 8px; display: flex; gap: 8px; align-items: baseline; font-size: 12.5px; line-height: 1.45; color: #ebeef5;
   background: rgba(var(--accent-rgb), .08); border: 1px solid rgba(var(--accent-rgb), .22); border-radius: 9px; padding: 6px 10px; }
 .pun b { color: var(--accent); font-size: 10.5px; text-transform: uppercase; letter-spacing: .4px; flex-shrink: 0; }
 .nothing-t { color: var(--text); font-size: 16px; font-weight: 700; margin-bottom: 6px; }
 .foot { flex-shrink: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 9px 16px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--muted); background: rgba(0,0,0,.2); }
 .foot span { display: inline-flex; align-items: center; gap: 3px; }
-kbd { font: 600 10.5px "Manrope Variable", "Segoe UI", sans-serif; color: var(--text); background: #262626; border: 1px solid #333; border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; min-width: 18px; text-align: center; }
+kbd { font: 600 10.5px "Geologica Variable", "Segoe UI", sans-serif; color: var(--text); background: #24262b; border: 1px solid #31353e; border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; min-width: 18px; text-align: center; }
 
 /* ---------- промокод в строке ---------- */
 .bar { position: relative; }
@@ -222,7 +225,7 @@ kbd { font: 600 10.5px "Manrope Variable", "Segoe UI", sans-serif; color: var(--
 .promo:hover .promo-cmd { color: #fff; }
 .promo:active .promo-code { opacity: .7; }
 .promo-ic { width: 15px; height: 15px; color: var(--accent); }
-.promo-cmd { color: #bdbdbd; font-weight: 500; }
+.promo-cmd { color: #d4dbe8; font-weight: 500; }
 .promo-code { color: var(--accent); font-weight: 800; letter-spacing: .3px; }
 .empty p { line-height: 1.6; margin: 0 0 16px; }
 .btns.center { justify-content: center; }
@@ -242,7 +245,7 @@ kbd { font: 600 10.5px "Manrope Variable", "Segoe UI", sans-serif; color: var(--
 .note-title { flex: 1; min-width: 0; padding: 8px 12px; font-weight: 700; font-size: 15px; }
 .note-text { flex: 1; resize: none; padding: 12px; line-height: 1.6; min-height: 440px; }
 .note-title:focus, .note-text:focus { border-color: rgba(var(--accent-rgb), .5); }
-.kind.n { color: #c3a6ff; background: rgba(195, 166, 255, .12); }
+.kind.n { color: var(--pastel); background: rgba(199, 200, 255, .12); }
 .note-hits { margin-bottom: 10px; }
 
 /* ---------- подписи под иконками в строке ---------- */
@@ -262,16 +265,16 @@ kbd { font: 600 10.5px "Manrope Variable", "Segoe UI", sans-serif; color: var(--
 
 /* ---------- ручка для перетаскивания ---------- */
 .grip { align-self: stretch; width: 22px; margin-left: -8px; flex-shrink: 0; display: grid; place-items: center;
-  cursor: grab; border-radius: 10px; color: #5a5a5a; transition: color .15s, background .15s; }
-.grip:hover { color: #bdbdbd; background: rgba(255, 255, 255, .04); }
+  cursor: grab; border-radius: 10px; color: #3d4046; transition: color .15s, background .15s; }
+.grip:hover { color: #d4dbe8; background: rgba(255, 255, 255, .04); }
 .grip:active { cursor: grabbing; }
 .grip svg { width: 10px; height: 18px; fill: currentColor; stroke: none; pointer-events: none; }
 
 /* ---------- отзыв ---------- */
 .fb { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
 .fb-stars { display: flex; align-items: center; gap: 2px; }
-.fb-stars button { border: 0; background: none; cursor: pointer; font-size: 22px; line-height: 1; padding: 0 2px; color: #3a3a3a; transition: color .1s, transform .1s; }
-.fb-stars button.on { color: #ffc23d; }
+.fb-stars button { border: 0; background: none; cursor: pointer; font-size: 22px; line-height: 1; padding: 0 2px; color: #31353e; transition: color .1s, transform .1s; }
+.fb-stars button.on { color: #f4bd00; }
 .fb-stars button:hover { transform: scale(1.12); }
 .fb-stars .small { margin-left: 10px; }
 .fb-text, .fb-contact { font: inherit; color: var(--text); background: rgba(0, 0, 0, .25); border: 1px solid var(--edge-hover); border-radius: 9px; outline: none; }
@@ -309,7 +312,7 @@ kbd { font: 600 10.5px "Manrope Variable", "Segoe UI", sans-serif; color: var(--
 .vc-err { flex: 1; color: var(--bad); font-weight: 600; font-size: 13px; }
 .vc-head .muted { flex: 1; font-weight: 500; }
 .vc-x { margin-left: auto; border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 13px; padding: 4px 6px; border-radius: 6px; }
-.vc-x:hover { color: var(--text); background: #262626; }
+.vc-x:hover { color: var(--text); background: #24262b; }
 .vc-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); animation: vc-pulse 1s ease-in-out infinite; }
 @keyframes vc-pulse { 50% { opacity: .35; transform: scale(.75); } }
 .vc-hint, .vc-none { color: var(--muted); font-size: 12.5px; line-height: 1.5; }
@@ -325,12 +328,12 @@ kbd { font: 600 10.5px "Manrope Variable", "Segoe UI", sans-serif; color: var(--
 .vc-hist { border-top: 1px solid var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 2px; }
 .vc-hist-t { font-size: 10.5px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--muted-2); margin-bottom: 2px; }
 .vc-hist-row { display: flex; justify-content: space-between; gap: 10px; border: 0; background: transparent; text-align: left; padding: 5px 6px; border-radius: 7px; cursor: pointer; font-size: 12.5px; }
-.vc-hist-row:hover { background: #1e1e1e; }
+.vc-hist-row:hover { background: #24262b; }
 .vc-hist-q { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vc-hist-row .muted { flex-shrink: 0; font-size: 11.5px; }
 .scale-btns { align-items: center; } .scale-val { min-width: 48px; text-align: center; font-weight: 700; }
 
-.err-text { color: #ff6b6b; }
+.err-text { color: var(--bad); }
 
 /* искали номер — показываем статью целиком */
 .hit-text.full { white-space: pre-wrap; display: block; -webkit-line-clamp: unset; overflow: visible; }
@@ -358,7 +361,7 @@ kbd { font: 600 10.5px "Manrope Variable", "Segoe UI", sans-serif; color: var(--
 .hw-row-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; min-width: 0; }
 .hw-doc { flex: 1; min-width: 0; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hw-time { font-size: 11px; color: var(--muted); flex-shrink: 0; }
-.hw-text { font-size: 12.5px; line-height: 1.45; color: #d6d6d6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.hw-text { font-size: 12.5px; line-height: 1.45; color: #d4dbe8; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .hw-empty { padding: 10px 6px; }
 .hw-empty-t { font-weight: 600; margin-bottom: 6px; }
 .hw-changes { margin: 0 14px 14px; border: 1px solid rgba(var(--accent-rgb), .3); background: rgba(var(--accent-rgb), .08);

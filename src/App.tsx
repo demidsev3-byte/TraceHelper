@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { Doc, Point, diffDoc, norm, parsePoints, punishment, search, snippet, stem } from "./law";
-import "@fontsource-variable/manrope";
+import "@fontsource-variable/geologica";
 import { VoiceSession, clientId, startVoice } from "./voice";
 import { AiAnswer, askAi } from "./ai";
 import { getVersion } from "@tauri-apps/api/app";
