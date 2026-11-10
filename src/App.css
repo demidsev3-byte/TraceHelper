@@ -1,5 +1,5 @@
 :root {
-  /* цвета из брендбука Trace (logs.trace-rp.com/admin/docs/brand) */
+  /* цвета из брендбука Trace */
   --glass: rgba(13, 15, 20, 0.96);      /* Основной Чёрный #0d0f14 */
   --panel: rgba(13, 15, 20, 0.97);
   --card: #1b1d22;                       /* Основной Тёмно-серый */
