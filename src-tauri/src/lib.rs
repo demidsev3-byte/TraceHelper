@@ -96,6 +96,8 @@ struct Settings {
     scale: f64,
     /// показывать плашку промокода в строке
     show_promo: bool,
+    /// подпись автора под строкой
+    show_credit: bool,
 }
 
 impl Default for Settings {
@@ -110,6 +112,7 @@ impl Default for Settings {
             voice_overlay: true,
             scale: 1.0,
             show_promo: true,
+            show_credit: true,
         }
     }
 }
@@ -261,7 +264,7 @@ fn spawn_base_sync(app: AppHandle) {
 // ---------- окно ----------
 
 const BAR_W: f64 = 1100.0;
-const BAR_H: f64 = 131.0; // строка поиска + место под тень
+const BAR_H: f64 = 155.0; // строка поиска + вкладка с подписью снизу + место под тень
 const PANEL_H: f64 = 620.0;
 
 /// Текущий размер окна (масштаб) и раскрыта ли панель — чтобы пересчитать размер при смене масштаба.

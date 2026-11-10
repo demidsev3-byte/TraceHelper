@@ -15,7 +15,7 @@
         "label": "main",
         "title": "Trace Helper",
         "width": 1100,
-        "height": 131,
+        "height": 155,
         "resizable": false,
         "decorations": false,
         "transparent": true,

@@ -21,6 +21,7 @@ type Settings = {
   voiceOverlay: boolean;
   scale: number;
   showPromo: boolean;
+  showCredit: boolean;
   autostart: boolean;
 };
 
@@ -432,7 +433,7 @@ export default function App() {
   }, [view]);
 
   return (
-    <div className="shell" data-tauri-drag-region>
+    <div className={`shell ${expanded ? "" : "mini"}`} data-tauri-drag-region>
       <div
         className="bar"
         data-tauri-drag-region
@@ -486,13 +487,6 @@ export default function App() {
             Обновить до {update}
           </button>
         )}
-        <div className="credit-tab">
-          created by <b>filosov</b>
-          <i>|</i>
-          <button className="credit-link" title="Скопировать ник в Discord" onClick={async () => { await navigator.clipboard.writeText("f1losovsky"); say("Discord скопирован: f1losovsky"); }}>Discord — f1losovsky</button>
-          <i>|</i>
-          <button className="credit-link" title="Открыть Telegram" onClick={() => openUrl("https://t.me/filosovsky").catch(() => {})}>Telegram — filosovsky</button>
-        </div>
         {settings && settings.showPromo !== false && (
           <button
             className="promo"
@@ -526,6 +520,7 @@ export default function App() {
           {changed.length > 0 && <span className="dot" />}
         </button>
         <button className={`ib ${view.kind === "settings" ? "on" : ""}`} title="Настройки" onClick={() => toggle("settings")}>{Icon.gear}<span className="cap">Настройки</span></button>
+        {!expanded && settings?.showCredit !== false && <Credit say={say} className="credit-tab" />}
       </div>
 
       {expanded && (
@@ -727,8 +722,10 @@ export default function App() {
               />
             )}
           </div>
-          {view.kind === "home" && hits.length > 0 && (
+          {(settings?.showCredit !== false || (view.kind === "home" && hits.length > 0)) && (
             <div className="foot">
+              {settings?.showCredit !== false && <Credit say={say} className="credit" />}
+              {view.kind === "home" && hits.length > 0 && (<>
                 <span><kbd>↑</kbd><kbd>↓</kbd> выбрать</span>
                 <span><kbd>Enter</kbd> открыть</span>
                 <span><kbd>Ctrl</kbd><kbd>C</kbd> копировать</span>
@@ -736,6 +733,7 @@ export default function App() {
                 <span><kbd>Esc</kbd> очистить</span>
                 <span><kbd>Ctrl</kbd><kbd>Пробел</kbd> голосом</span>
                 <span><kbd>Ctrl</kbd><kbd>Enter</kbd> спросить ИИ</span>
+              </>)}
             </div>
           )}
           {toast && <div className="toast">{toast}</div>}
@@ -1055,8 +1053,9 @@ function SettingsView({
         <Toggle label="Голос в игре (Ctrl+Пробел)" hint="Жмёшь в игре, говоришь — справа появляется статья и история запросов. Игра остаётся активной" on={s.voiceOverlay} onChange={(v) => set({ voiceOverlay: v })} />
       </div>
 
-      <h3>Промокод</h3>
+      <h3>Плашки</h3>
       <div className="card">
+        <Toggle label="Подпись автора" hint="created by filosov и контакты под строкой поиска" on={s.showCredit !== false} onChange={(v) => set({ showCredit: v })} />
         <Toggle label="Плашка промокода" hint="Кнопка «/promo FILOSOV» в строке. Выключено — её не будет" on={s.showPromo !== false} onChange={(v) => set({ showPromo: v })} />
       </div>
 
@@ -1164,3 +1163,14 @@ function UpdateRow() {
   );
 }
 
+function Credit({ say, className }: { say: (t: string) => void; className: string }) {
+  return (
+    <div className={className}>
+      created by <b>filosov</b>
+      <i>|</i>
+      <button className="credit-link" title="Скопировать ник в Discord" onClick={async () => { await navigator.clipboard.writeText("f1losovsky"); say("Discord скопирован: f1losovsky"); }}>Discord — f1losovsky</button>
+      <i>|</i>
+      <button className="credit-link" title="Открыть Telegram" onClick={() => openUrl("https://t.me/filosovsky").catch(() => {})}>Telegram — filosovsky</button>
+    </div>
+  );
+}
