@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-forum-save"
+description = "Enables the forum_save command without any pre-configured scope."
+commands.allow = ["forum_save"]
+
+[[permission]]
+identifier = "deny-forum-save"
+description = "Denies the forum_save command without any pre-configured scope."
+commands.deny = ["forum_save"]

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-delete-doc"
+description = "Enables the delete_doc command without any pre-configured scope."
+commands.allow = ["delete_doc"]
+
+[[permission]]
+identifier = "deny-delete-doc"
+description = "Denies the delete_doc command without any pre-configured scope."
+commands.deny = ["delete_doc"]

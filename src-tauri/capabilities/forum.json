@@ -1,0 +1,17 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "forum",
+  "description": "Окно форума Trace RP: может только передавать темы в приложение",
+  "windows": ["forum"],
+  "remote": {
+    "urls": ["https://forum.trace-rp.com/*"]
+  },
+  "permissions": [
+    "allow-forum-hello",
+    "allow-forum-save",
+    "allow-forum-skip",
+    "allow-forum-queue",
+    "allow-forum-stop",
+    "allow-forum-close"
+  ]
+}

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-history-open"
+description = "Enables the history_open command without any pre-configured scope."
+commands.allow = ["history_open"]
+
+[[permission]]
+identifier = "deny-history-open"
+description = "Denies the history_open command without any pre-configured scope."
+commands.deny = ["history_open"]

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-forum-stop"
+description = "Enables the forum_stop command without any pre-configured scope."
+commands.allow = ["forum_stop"]
+
+[[permission]]
+identifier = "deny-forum-stop"
+description = "Denies the forum_stop command without any pre-configured scope."
+commands.deny = ["forum_stop"]

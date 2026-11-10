@@ -1,0 +1,72 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Trace Helper",
+  "version": "1.6.0",
+  "identifier": "com.filosov.helper",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Trace Helper",
+        "width": 1100,
+        "height": 131,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis"
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "createUpdaterArtifacts": true,
+    "publisher": "Filosov @f1losovsky",
+    "shortDescription": "Правила и законы Trace RP поверх игры",
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": [
+          "Russian"
+        ],
+        "displayLanguageSelector": false,
+        "installerIcon": "icons/icon.ico",
+        "sidebarImage": "icons/installer-sidebar.bmp",
+        "headerImage": "icons/installer-header.bmp"
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDMxNkExQTZFRDI4OUY0NzcKUldSMzlJblNiaHBxTVUwOTBHZFhpWWgza3drSnZyZ0x4Q3RvU0lOZ2pMUlAwUVArVEpDYmJkSVYK",
+      "endpoints": [
+        "https://github.com/demidsev3-byte/TraceHelper/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "quiet"
+      }
+    }
+  },
+  "mainBinaryName": "Trace Helper"
+}

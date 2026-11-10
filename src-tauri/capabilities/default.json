@@ -1,0 +1,39 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Главное окно и карточка голоса",
+  "windows": [
+    "main",
+    "voice",
+    "history"
+  ],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-set-size",
+    "core:window:allow-set-position",
+    "core:window:allow-hide",
+    "opener:default",
+    "allow-get-docs",
+    "allow-delete-doc",
+    "allow-clear-changes",
+    "allow-get-settings",
+    "allow-set-settings",
+    "allow-set-autostart",
+    "allow-open-forum",
+    "allow-sync-all",
+    "allow-fetch-laws",
+    "allow-hide-main",
+    "allow-set-pinned",
+    "allow-set-expanded",
+    "allow-quit",
+    "allow-check-update",
+    "allow-install-update",
+    "allow-voice-resize",
+    "allow-voice-hide",
+    "allow-voice-open",
+    "allow-toggle-history",
+    "allow-history-hide",
+    "allow-history-open"
+  ]
+}

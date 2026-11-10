@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-forum-close"
+description = "Enables the forum_close command without any pre-configured scope."
+commands.allow = ["forum_close"]
+
+[[permission]]
+identifier = "deny-forum-close"
+description = "Denies the forum_close command without any pre-configured scope."
+commands.deny = ["forum_close"]

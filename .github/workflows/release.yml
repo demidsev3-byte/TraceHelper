@@ -1,0 +1,83 @@
+# Сборка и выкладка новой версии.
+# Запускается, когда в репозиторий пушится тег вида v1.6.0 (это делает release.sh).
+# Текст тега становится описанием обновления.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Версия из тега совпадает с tauri.conf.json
+        id: ver
+        shell: bash
+        run: |
+          VER=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          TAG="${GITHUB_REF_NAME#v}"
+          if [ "$VER" != "$TAG" ]; then echo "Тег v$TAG, а в tauri.conf.json $VER"; exit 1; fi
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          # текст аннотированного тега = описание обновления
+          git fetch --force --tags
+          NOTES=$(git tag -l --format='%(contents)' "$GITHUB_REF_NAME")
+          [ -n "$NOTES" ] || NOTES="Обновление"
+          printf '%s' "$NOTES" > notes.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: npm ci
+
+      - name: Сборка
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: npx tauri build
+
+      - name: latest.json для автообновления
+        shell: bash
+        run: |
+          VER="${{ steps.ver.outputs.version }}"
+          DIR="src-tauri/target/release/bundle/nsis"
+          ASSET="TraceHelper_${VER}_x64-setup.exe"
+          cp "$DIR/Trace Helper_${VER}_x64-setup.exe" "$ASSET"
+          cp "$DIR/Trace Helper_${VER}_x64-setup.exe.sig" "$ASSET.sig"
+          python - "$VER" "$ASSET" "$GITHUB_REPOSITORY" <<'PY'
+          import json, sys, datetime
+          ver, asset, repo = sys.argv[1:]
+          json.dump({
+              "version": ver,
+              "notes": open("notes.txt", encoding="utf-8").read(),
+              "pub_date": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+              "platforms": {"windows-x86_64": {
+                  "signature": open(asset + ".sig", encoding="utf-8").read(),
+                  "url": f"https://github.com/{repo}/releases/download/v{ver}/{asset}",
+              }},
+          }, open("latest.json", "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+          PY
+
+      - name: Релиз
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VER="${{ steps.ver.outputs.version }}"
+          gh release create "v$VER" "TraceHelper_${VER}_x64-setup.exe" latest.json TraceHelper-update.bat \
+            --title "Trace Helper $VER" --notes-file notes.txt --latest
