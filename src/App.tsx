@@ -8,7 +8,7 @@ import { VoiceSession, clientId, startVoice } from "./voice";
 import { AiAnswer, askAi } from "./ai";
 import { getVersion } from "@tauri-apps/api/app";
 import "./App.css";
-import logoUrl from "./assets/logo.png";
+import logoUrl from "./assets/logo.svg";
 
 type Settings = {
   hotkey: string;
