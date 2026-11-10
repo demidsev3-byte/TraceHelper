@@ -1049,7 +1049,7 @@ function SettingsView({
         <Toggle label="Прятать, когда переключаюсь в игру" hint="Выключено: окно висит, пока не нажмёшь Alt+Q или Esc" on={s.hideOnBlur} onChange={(v) => set({ hideOnBlur: v })} />
         <Toggle label="Копировать пункт по клику" on={s.copyOnClick} onChange={(v) => set({ copyOnClick: v })} />
         <Toggle label="Запускать вместе с Windows" hint="Стартует свёрнутым в трей" on={s.autostart} onChange={(v) => set({ autostart: v })} />
-        <Toggle label="Автообновление" hint="Выключено: новая версия не ставится сама, в строке появится кнопка «Обновить»" on={s.autoUpdate} onChange={(v) => set({ autoUpdate: v })} />
+        <Toggle label="Автообновление" hint="Выключено (по умолчанию): новая версия не ставится сама, в строке появится кнопка «Обновить». Каждое обновление подписано и проверяется перед установкой" on={s.autoUpdate} onChange={(v) => set({ autoUpdate: v })} />
         <Toggle label="Голос в игре (Ctrl+Пробел)" hint="Жмёшь в игре, говоришь — справа появляется статья и история запросов. Игра остаётся активной" on={s.voiceOverlay} onChange={(v) => set({ voiceOverlay: v })} />
       </div>
 

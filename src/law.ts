@@ -35,12 +35,12 @@ function pointNum(line: string): string | null {
   return null;
 }
 
-const cache = new Map<string, Point[]>();
+// разобранные пункты по документу; сравниваем весь текст, чтобы любая правка сбрасывала кеш
+const cache = new Map<string, { text: string; points: Point[] }>();
 
 export function parsePoints(docId: string, text: string): Point[] {
-  const ck = docId + "\u0000" + text.length + "\u0000" + text.slice(0, 64);
-  const hit = cache.get(ck);
-  if (hit) return hit;
+  const hit = cache.get(docId);
+  if (hit && hit.text === text) return hit.points;
 
   const out: Point[] = [];
   let chapter = "";
@@ -82,7 +82,7 @@ export function parsePoints(docId: string, text: string): Point[] {
     cur = { num: "", lines: [head], chapter };
     flush();
   }
-  cache.set(ck, out);
+  cache.set(docId, { text, points: out });
   return out;
 }
 

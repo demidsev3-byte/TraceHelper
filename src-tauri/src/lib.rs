@@ -73,6 +73,9 @@ struct Doc {
     fetched_at: u64,
     #[serde(default)]
     changed_at: Option<u64>,
+    /// версия общей базы, из которой взят текст (fetched_at в base.json)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    base_at: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Default)]
@@ -98,6 +101,9 @@ struct Settings {
     show_promo: bool,
     /// подпись автора под строкой
     show_credit: bool,
+    /// версия настроек: 1 — автообновление выключено у всех, включает сам пользователь
+    #[serde(default)]
+    rev: u32,
 }
 
 impl Default for Settings {
@@ -108,11 +114,12 @@ impl Default for Settings {
             streamer_mode: false,
             hide_on_blur: false,
             copy_on_click: true,
-            auto_update: true,
+            auto_update: false,
             voice_overlay: true,
             scale: 1.0,
             show_promo: true,
             show_credit: true,
+            rev: 1,
         }
     }
 }
@@ -205,29 +212,37 @@ fn require(webview: &Webview, label: &str) -> Res<()> {
     }
 }
 
-/// Вливает общую базу в свою: новые документы добавляет, более свежие — обновляет
-/// (старый текст уходит в «изменения»). Возвращает, поменялось ли что-то.
+/// Вливает общую базу в свою: новые документы добавляет, изменённые в базе — обновляет
+/// (старый текст уходит в «изменения»). Сверяем с версией базы, а не с датой своей копии:
+/// иначе документ, который ты сам скачал с форума позже, навсегда перестаёт обновляться.
 fn merge_base(lib: &mut Library, base: Library) -> bool {
     let mut changed = false;
     for b in base.docs {
         if b.text.trim().is_empty() {
             continue;
         }
+        let ver = Some(b.fetched_at);
         match lib.docs.iter_mut().find(|d| d.id == b.id) {
             None => {
-                lib.docs.push(Doc { prev_text: None, changed_at: None, title: clean_title(&b.title), ..b });
+                lib.docs.push(Doc { prev_text: None, changed_at: None, base_at: ver, title: clean_title(&b.title), ..b });
                 changed = true;
             }
-            Some(d) if b.fetched_at > d.fetched_at => {
+            // копия из версии до 1.7.1 (версия базы не записана) и не старше базы — просто запоминаем версию
+            Some(d) if d.base_at.is_none() && d.fetched_at >= b.fetched_at => {
+                d.base_at = ver;
+                changed = true;
+            }
+            Some(d) if d.base_at != ver => {
                 if d.text != b.text {
                     d.prev_text = Some(std::mem::take(&mut d.text));
                     d.changed_at = Some(b.fetched_at);
+                    d.text = b.text;
                 }
-                d.text = b.text;
                 d.title = clean_title(&b.title);
                 d.section = b.section;
                 d.url = b.url;
-                d.fetched_at = b.fetched_at;
+                d.fetched_at = d.fetched_at.max(b.fetched_at);
+                d.base_at = ver;
                 changed = true;
             }
             _ => {}
@@ -806,7 +821,9 @@ fn set_settings(app: AppHandle, webview: Webview, state: State<AppState>, settin
         }
     }
     apply_window_settings(&app, &settings);
+    let rev = cur.rev;
     *cur = settings;
+    cur.rev = cur.rev.max(rev); // окно не знает про версию настроек — не теряем её
     save(&app, "settings.json", &*cur)
 }
 
@@ -1049,6 +1066,7 @@ fn forum_save(app: AppHandle, webview: Webview, state: State<AppState>, doc: Inc
                 prev_text: None,
                 fetched_at: t,
                 changed_at: None,
+                base_at: None,
             });
         }
         save(&app, "library.json", &*lib)?;
@@ -1158,7 +1176,13 @@ pub fn run() {
                     let _ = save(&handle, "library.json", &lib);
                 }
             }
-            let settings: Settings = load(&handle, "settings.json");
+            let mut settings: Settings = load(&handle, "settings.json");
+            // 1.7.1: автообновление больше не включено по умолчанию — сбрасываем один раз у всех
+            if settings.rev < 1 {
+                settings.auto_update = false;
+                settings.rev = 1;
+                let _ = save(&handle, "settings.json", &settings);
+            }
             // состояние — сразу, до создания окон: иначе окно успевает спросить настройки раньше и получает ошибку
             app.manage(AppState {
                 lib: Mutex::new(lib),
