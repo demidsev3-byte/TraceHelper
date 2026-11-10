@@ -9,6 +9,7 @@ import { AiAnswer, askAi } from "./ai";
 import { getVersion } from "@tauri-apps/api/app";
 import "./App.css";
 import logoUrl from "./assets/logo.svg";
+import Catalog from "./Catalog";
 
 type Settings = {
   hotkey: string;
@@ -27,7 +28,7 @@ type Settings = {
 const PROMO = "filosov";
 
 const clampScale = (v: number) => Math.round(Math.min(1.5, Math.max(0.7, v)) * 10) / 10;
-type Panel = "library" | "history" | "settings" | "notes";
+type Panel = "library" | "history" | "settings" | "notes" | "catalog";
 type View = { kind: "home" } | { kind: "doc"; id: string; point?: number } | { kind: Panel };
 type Crawl = { active: boolean; left: number; savedNow: number };
 type Kind = "rules" | "laws" | null;
@@ -75,6 +76,9 @@ const Icon = {
   ),
   mic: (
     <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" /></svg>
+  ),
+  shop: (
+    <svg viewBox="0 0 24 24"><path d="M3 9h18l-1.5 11a1 1 0 0 1-1 .9H5.5a1 1 0 0 1-1-.9zM8 9V7a4 4 0 0 1 8 0v2" /></svg>
   ),
   gear: (
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" /></svg>
@@ -514,6 +518,7 @@ export default function App() {
         </div>
         <div className="sep" />
         <button className={`ib ${view.kind === "notes" ? "on" : ""}`} title="Заметки" onClick={() => toggle("notes")}>{Icon.note}<span className="cap">Заметки</span></button>
+        <button className={`ib ${view.kind === "catalog" ? "on" : ""}`} title="Каталог: транспорт, одежда, причёски, предметы" onClick={() => toggle("catalog")}>{Icon.shop}<span className="cap">Каталог</span></button>
         <button className={`ib ${view.kind === "library" ? "on" : ""}`} title="Все документы" onClick={() => toggle("library")}>{Icon.book}<span className="cap">Документы</span></button>
         <button className="ib" title="История (Ctrl+H) — откроется справа" onClick={() => invoke("toggle_history").catch(() => {})}>
           {Icon.history}
@@ -661,6 +666,10 @@ export default function App() {
               />
             )}
 
+
+            {view.kind === "catalog" && (
+              <Catalog onCopy={async (t, what) => { try { await navigator.clipboard.writeText(t); say(`${what} скопировано: ${t}`); } catch { say("Не удалось скопировать"); } }} />
+            )}
 
             {view.kind === "library" &&
               (docs.length ? (
