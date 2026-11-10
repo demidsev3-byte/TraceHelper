@@ -10,6 +10,9 @@ const STT_PER_DAY = Number(Bun.env.STT_PER_DAY || 150); // на одного п�
 const IP_PER_DAY = Number(Bun.env.IP_PER_DAY || 400); // на один адрес
 const ASK_PER_DAY = Number(Bun.env.ASK_PER_DAY || (DEEPSEEK_KEY ? 50 : 10)); // вопросов к ИИ на одного пользователя
 const FEEDBACK_PER_DAY = Number(Bun.env.FEEDBACK_PER_DAY || 5);
+// общий потолок на всех: даже с подделанными id и адресами больше не потратить
+const ASK_TOTAL_PER_DAY = Number(Bun.env.ASK_TOTAL_PER_DAY || 1500);
+const STT_TOTAL_PER_DAY = Number(Bun.env.STT_TOTAL_PER_DAY || 5000);
 const MAX_AUDIO = 3 * 1024 * 1024; // около минуты речи
 
 // ИИ: DeepSeek, если есть ключ (большой контекст — кодексы целиком), иначе Groq (только выдержки)
@@ -18,7 +21,7 @@ const AI = DEEPSEEK_KEY
   : { name: "groq", url: "https://api.groq.com/openai/v1/chat/completions", key: GROQ_KEY, model: Bun.env.AI_MODEL || "openai/gpt-oss-120b", snips: 6000, full: false };
 
 // Общая база правил и законов — та же, что скачивает программа
-const BASE_URL = "https://github.com/demidsev3-byte/TraceHelper-releases/releases/download/base/base.json";
+const BASE_URL = "https://github.com/demidsev3-byte/TraceHelper/releases/download/base/base.json";
 const FULL_DOCS = /уголовный кодекс|административный кодекс|дорожный кодекс/i; // эти документы ИИ получает целиком
 
 // Подсказка для распознавания: слова, которые Whisper иначе путает
@@ -197,13 +200,16 @@ Bun.serve({
         feedback: !!(TG_TOKEN && TG_CHAT),
       });
 
-    const client = (req.headers.get("x-client-id") || "").slice(0, 64);
-    const ip = (req.headers.get("x-forwarded-for") || server.requestIP(req)?.address || "").split(",")[0].trim();
+    const client = (req.headers.get("x-client-id") || "").replace(/[^\w-]/g, "").slice(0, 64);
+    // адрес клиента: X-Real-IP ставит сам Railway; в X-Forwarded-For клиент может дописать что угодно,
+    // поэтому из него берём последний адрес — его добавил прокси Railway
+    const xff = (req.headers.get("x-forwarded-for") || "").split(",").map((x) => x.trim()).filter(Boolean);
+    const ip = req.headers.get("x-real-ip")?.trim() || xff[xff.length - 1] || server.requestIP(req)?.address || "?";
 
     if (req.method === "POST" && url.pathname === "/stt") {
       if (!GROQ_KEY && !OPENAI_KEY) return json(503, { error: "Голосовой ввод ещё не настроен" });
       if (!client) return json(400, { error: "Нет id клиента" });
-      if (!allow("c:" + client, STT_PER_DAY) || !allow("ip:" + ip, IP_PER_DAY))
+      if (!allow("c:" + client, STT_PER_DAY) || !allow("ip:" + ip, IP_PER_DAY) || !allow("stt:all", STT_TOTAL_PER_DAY))
         return json(429, { error: "Лимит голосовых запросов на сегодня исчерпан" });
       try {
         const audio = await req.arrayBuffer();
@@ -231,7 +237,7 @@ Bun.serve({
       const snips: Snip[] = (Array.isArray(body?.context) ? body.context : [])
         .slice(0, 30)
         .map((s: any) => ({ doc: String(s?.doc || "").slice(0, 150), num: String(s?.num || "").slice(0, 20), text: String(s?.text || "") }));
-      if (!allow("a:" + client, ASK_PER_DAY) || !allow("aip:" + ip, ASK_PER_DAY * 3))
+      if (!allow("a:" + client, ASK_PER_DAY) || !allow("aip:" + ip, ASK_PER_DAY * 3) || !allow("ask:all", ASK_TOTAL_PER_DAY))
         return json(429, { error: `Лимит ${ASK_PER_DAY} вопросов к ИИ на сегодня исчерпан. Поиск по правилам работает без ограничений.` });
       try {
         const answer = await ask(question, snips);
@@ -240,6 +246,7 @@ Bun.serve({
       } catch (e) {
         refund("a:" + client);
         refund("aip:" + ip);
+        refund("ask:all");
         console.error(e);
         if (e instanceof Busy) return json(503, { error: "ИИ сейчас перегружен — попробуй через минуту. Если не поможет, общий лимит на сегодня закончился." });
         return json(502, { error: "ИИ не ответил, попробуй ещё раз" });
