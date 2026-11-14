@@ -1140,8 +1140,43 @@ fn forum_close(app: AppHandle, webview: Webview) -> Res<()> {
 
 // ---------- запуск ----------
 
+/// Установленная копия (её обновляет автообновление): %LOCALAPPDATA%\Trace Helper\Trace Helper.exe
+#[cfg(windows)]
+fn installed_exe() -> Option<std::path::PathBuf> {
+    let p = std::path::PathBuf::from(std::env::var_os("LOCALAPPDATA")?)
+        .join("Trace Helper")
+        .join("Trace Helper.exe");
+    p.is_file().then_some(p)
+}
+
+/// Запущена посторонняя копия exe (например, скопированная на рабочий стол или диск D),
+/// а программа установлена — передаём запуск установленной версии. Иначе старая копия
+/// стартует с Windows, а single-instance не даёт открыть новую.
+#[cfg(windows)]
+fn redirect_to_installed() -> bool {
+    if cfg!(debug_assertions) || std::env::var_os("TH_NO_REDIRECT").is_some() {
+        return false;
+    }
+    let (Ok(cur), Some(inst)) = (std::env::current_exe(), installed_exe()) else {
+        return false;
+    };
+    match (std::fs::canonicalize(&cur), std::fs::canonicalize(&inst)) {
+        (Ok(a), Ok(b)) if a != b => {}
+        _ => return false,
+    }
+    std::process::Command::new(&inst)
+        .args(std::env::args_os().skip(1))
+        .env("TH_NO_REDIRECT", "1")
+        .spawn()
+        .is_ok()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(windows)]
+    if redirect_to_installed() {
+        return;
+    }
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| show_main(app)))
         .plugin(tauri_plugin_opener::init())
@@ -1166,6 +1201,14 @@ pub fn run() {
         )
         .setup(|app| {
             let handle = app.handle().clone();
+            // автозапуск хранит путь к exe, из которого его включили, и сам не обновляется:
+            // переписываем на текущий exe, чтобы с Windows стартовала эта (свежая) версия
+            if !cfg!(debug_assertions) {
+                let al = handle.autolaunch();
+                if al.is_enabled().unwrap_or(false) {
+                    let _ = al.enable();
+                }
+            }
             let mut lib: Library = load(&handle, "library.json");
             for d in &mut lib.docs {
                 d.title = clean_title(&d.title);
